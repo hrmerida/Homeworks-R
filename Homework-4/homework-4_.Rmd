@@ -1,0 +1,83 @@
+```{r}
+library(tidyverse)
+diamonds <- read_csv('diamonds.csv')
+glimpse(diamonds)
+
+diamonds
+str(diamonds)
+```
+```{r}
+#1. DISPERSION
+ggplot(diamonds, aes(x=carat, y=price )) + geom_point()
+#1.2. #1.3. Edite la estética y mapee el color con la variable clarity.
+ggplot(diamonds, aes(x=carat, y=price, color=clarity)) + geom_point()
+```
+ 
+
+```{r}
+#2. Histograma
+
+#2.1 
+bins <- c(40)
+ggplot(diamonds, aes(x=price, y=bins)) + geom_col()
+ 
+#2.2
+bins <- c(40)
+ggplot(diamonds, aes(x=price, y=bins)) + geom_col() + scale_x_log10()
+
+
+
+```
+```{r}
+#3. Boxplots
+#3.1. Construya un gráfico de cajas colocando en la estética la variable cut (eje x)
+#versus price (eje y). Agregue una escala logarítmica por defecto y por último
+#devuelva el gráfico.
+
+ ggplot(diamonds, aes(x = cut, y = price ))  + geom_boxplot()   + scale_y_continuous()
+#3.2.
+ ggplot(diamonds, aes(x = cut, y = price , fill = cut))  + geom_boxplot()   + scale_y_continuous()
+```
+
+```{r}
+ # 4.1. 
+filtered_price <- diamonds %>%
+  filter(price  > 1000 , (cut  %in% c ("Good", "Ideal", "Premium"))  )
+ filtered_price
+
+
+ # 4.2. Utilice la variable filtered_price para construir un gráfico de barras, en la estética configure x = cut, y = depth.
+ggplot(filtered_price, aes(x=cut, y=depth)) + geom_col()
+ 
+#4.3
+ggplot(filtered_price, aes(x=cut, y=depth)) + geom_col() +  facet_wrap(~ clarity)
+
+#4.4
+ggplot(filtered_price, aes(x=cut, y=depth, fill=clarity )) + geom_col() +  facet_wrap(~ clarity)
+
+```
+
+
+```{r}
+#Grouping and summarizing
+diamonds
+str(diamonds)
+
+#5.1
+median_dimension_diamond <-diamonds %>%
+   group_by(cut) %>%
+  summarize(mediaX = median(x),mediay = median(y),mediaz = median(z) )
+median_dimension_diamond
+
+
+#5.2
+cut_premium <-diamonds %>%
+    filter(cut  == "Premium"  ) %>%
+   group_by(clarity) %>%
+  summarize(minPrice = min(price), maxPrice = max(price) )
+cut_premium
+
+#5.3 
+ggplot(cut_premium, aes(x=clarity, y=maxPrice, fill=clarity )) + geom_col()  
+
+```
