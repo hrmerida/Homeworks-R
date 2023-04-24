@@ -1,0 +1,86 @@
+```{r}
+library(tidyverse)
+library(dplyr)
+
+questions <- read_csv('questions.csv')
+answers <- read_csv('answers.csv')
+tags <- read_csv('tags.csv')
+question_tags <- read_csv('question_tags.csv')
+ 
+```
+
+```{r}
+
+#1.1
+questions_with_tags <- questions %>%
+  left_join(question_tags, by=c("id"="question_id") )%>%
+ inner_join(tags , by=c("tag_id"="id") )%>%
+mutate(tag_name= replace_na(tag_name, "only-r"))
+questions_with_tags
+ 
+```
+
+```{r}
+#2. Comparing scores across tags
+
+questions_with_tags%>%
+group_by(tag_name) %>%
+summarize(mean_score = mean(score))%>%
+  arrange(desc(mean_score))
+
+
+```
+```{r}
+#3. Finding gaps between questions and answers
+
+
+questions  %>%
+ inner_join(answers , by=c("id"="question_id"), suffix = c("_question","_answer"))   %>%
+  mutate(gap = creation_date_answer - creation_date_question ) 
+
+
+
+```
+
+```{r}
+ 
+#4. Joining question and answer counts
+
+answer_counts <- answers %>%
+  count(question_id, sort=TRUE)
+    answer_counts
+    
+question_answer_counts <- questions %>%
+  left_join(answer_counts , by=c("id"="question_id"), suffix = c("_question","_answer"))   %>%
+mutate(n= replace_na(n, 0))
+    question_answer_counts
+    
+    
+```
+```{r}
+ 
+#5. Joining questions, answers, and tags
+
+
+interes <- question_tags %>%  
+inner_join(question_answer_counts , by=c("question_id"="id"), suffix = c("_question_tag","_question_answer_counts"))    %>%  
+inner_join(tags , by=c("tag_id"="id"), suffix = c("_tags_question","_tags"))    %>%  
+  arrange(desc(n))
+interes
+
+Resumen_interes <- interes   %>%  
+  group_by(tag_name)  %>%  
+ summarize(n = sum(n))    %>%  
+  arrange(desc(n))
+
+Resumen_interes
+
+  ggplot(Resumen_interes, aes(x=tag_name, y=n ,color=tag_name, )) + geom_point()     
+ 
+  
+
+```
+
+ 
+
+```
